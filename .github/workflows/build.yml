@@ -18,53 +18,22 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Wipe and Clean All Old Cache (Start From Absolute Zero)
-        run: |
-          rm -rf ~/.buildozer
-          rm -rf .buildozer/
-          rm -rf ~/.android
-          rm -rf /home/runner/.buildozer
-
       - name: Set up Python Environment
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            git zip unzip openjdk-17-jdk python3-pip python3-virtualenv \
-            autoconf automake libtool pkg-config zlib1g-dev libncurses5-dev \
-            libffi-dev libssl-dev cmake gettext
 
       - name: Configure Java 17
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> "$GITHUB_ENV"
           echo "/usr/lib/jvm/java-17-openjdk-amd64/bin" >> "$GITHUB_PATH"
 
-      - name: Setup Official Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Buildozer and Cython
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install "cython<3.0.0" buildozer
-
-      - name: Force Link SDK and Build APK
-        run: |
-          export BUILDOZER_ALLOW_KIVY_NEW_DESIGN=1
-          
-          # إجبار البيئة على استخدام الـ SDK الرسمي الجاهز والموافق على تراخيصه مسبقاً
-          mkdir -p ~/.buildozer/android/platform/
-          ln -s "$ANDROID_HOME" ~/.buildozer/android/platform/android-sdk || true
-          
-          # تعديل ملف buildozer.spec لقهر إعدادات التراخيص تلقائياً
-          sed -i 's/android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec || true
-          sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec || true
-          
-          # تشغيل البناء النهائي المستقر وضخ الموافقة التلقائية
-          yes y | buildozer -v android debug
+      - name: Build APK using Official Kivy Action
+        uses: ArtemSBulgakov/buildozer-action@v1
+        with:
+          buildozer_version: stable
+          command: buildozer -v android debug
+          repository_root: .
 
       - name: Upload Finished APK
         uses: actions/upload-artifact@v4
