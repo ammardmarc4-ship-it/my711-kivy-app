@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -49,7 +48,6 @@ jobs:
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> "$GITHUB_ENV"
           echo "/usr/lib/jvm/java-17-openjdk-amd64/bin" >> "$GITHUB_PATH"
-
           java -version
           javac -version
 
@@ -63,6 +61,17 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install "cython==0.29.36" "buildozer==1.5.0"
 
+      - name: Accept Android SDK Licenses
+        run: |
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          if [ -d "$ANDROID_HOME/cmdline-tools/latest/bin" ]; then
+            yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          elif [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" ]; then
+            yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          else
+            yes | sdkmanager --licenses || true
+          fi
 
       - name: Clean previous build
         run: |
