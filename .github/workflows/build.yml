@@ -54,10 +54,10 @@ jobs:
       - name: Setup Android SDK & Accept Licenses
         uses: android-actions/setup-android@v3
 
-      - name: Install Rust
+      - name: Verify Rust Installation
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://rustup.rs | sh -s -- -y
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          rustc --version
+          cargo --version
 
       - name: Install Buildozer
         run: |
