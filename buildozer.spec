@@ -22,7 +22,7 @@ source.exclude_dirs = .git,.github,.buildozer,bin,venv,__pycache__
 version = 1.0.0
 
 # (list) Application requirements
-requirements = python3,kivy
+requirements = python3,kivy==2.2.1
 
 # (string) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
