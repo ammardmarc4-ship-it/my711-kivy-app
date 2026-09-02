@@ -44,15 +44,15 @@ jobs:
             cmake \
             gettext
 
-      - name: Setup Android SDK & Accept Licenses
-        uses: android-actions/setup-android@v3
-
       - name: Set Java 17
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> "$GITHUB_ENV"
           echo "/usr/lib/jvm/java-17-openjdk-amd64/bin" >> "$GITHUB_PATH"
           java -version
           javac -version
+
+      - name: Setup Android SDK & Accept Licenses
+        uses: android-actions/setup-android@v3
 
       - name: Install Rust
         run: |
