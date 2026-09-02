@@ -48,31 +48,32 @@ jobs:
         run: |
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> "$GITHUB_ENV"
           echo "/usr/lib/jvm/java-17-openjdk-amd64/bin" >> "$GITHUB_PATH"
-          java -version
-          javac -version
-
-      - name: Setup Android SDK & Accept Licenses
-        uses: android-actions/setup-android@v3
-
-      - name: Verify Rust Installation
-        run: |
-          rustc --version
-          cargo --version
 
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install "cython==0.29.36" "buildozer==1.5.0"
 
-      - name: Clean Buildozer Cache & Android Platform
+      - name: Force Accept All Android Licenses (The Ultimate Fix)
         run: |
-          rm -rf ~/.buildozer
-          rm -rf .buildozer/
-          buildozer android clean || true
+          # 1. إنشاء مسارات التراخيص في كل مكان ممكن يتوقعه Buildozer
+          mkdir -p ~/.android
+          mkdir -p .buildozer/android/platform/android-sdk/licenses
+          mkdir -p /home/runner/.buildozer/android/platform/android-sdk/licenses
+          
+          # 2. بصمة الموافقة الرسمية لجميع تراخيص الأندرويد (بما فيها الحزمة 37)
+          LICENSES="247a1c17b3447d98b30e45e722209b391f898a46\n28620e9826e8fb6137434c46f52a77a943a41224\n893a30fcc98b263673d44e651b58240d4c06041c\n7a866b5381b58be413a963a7fa2e892c55d084a7\n84831b9409646a547e30e925b74c1a3d17f10257\ne9ac30594db41cde3e4722856524a86b4d36a94d\nd56f5187479451eabf01fb74313026e229e61e3e"
+          
+          # 3. زرع التراخيص في النظام
+          echo -e "$LICENSES" > ~/.android/repositories.cfg
+          echo -e "$LICENSES" > .buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo -e "$LICENSES" > /home/runner/.buildozer/android/platform/android-sdk/licenses/android-sdk-license || true
 
       - name: Build APK
         run: |
-          buildozer -v android debug
+          # إجبار الأداة على تخطي أسئلة التراخيص برمجياً أثناء التجميع
+          export BUILDOZER_ALLOW_KIVY_NEW_DESIGN=1
+          yes | buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
